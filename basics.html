@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Using asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="asteval reference" href="api.html" />
+    <link rel="prev" title="Motivation for asteval" href="motivation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="asteval reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="motivation.html" title="Motivation for asteval"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Using asteval</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="using-asteval">
+<h1>Using asteval<a class="headerlink" href="#using-asteval" title="Permalink to this heading">¶</a></h1>
+<p>This chapter gives a quick overview of asteval, showing basic usage and the
+most important features.  Further details can be found in the next chapter
+(<a class="reference internal" href="api.html#asteval-api"><span class="std std-ref">asteval reference</span></a>).</p>
+<section id="creating-and-using-an-asteval-interpreter">
+<h2>creating and using an asteval Interpreter<a class="headerlink" href="#creating-and-using-an-asteval-interpreter" title="Permalink to this heading">¶</a></h2>
+<p>The asteval module is very easy to use.  Import the module and create an Interpreter:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>and now you have an embedded interpreter for a procedural, mathematical language
+that is very much like python:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print(x)&#39;</span><span class="p">)</span>
+<span class="go">1.73205080757</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;for i in range(10):</span>
+<span class="go">print(i, sqrt(i), log(1+1))</span>
+<span class="go">&#39;&#39;&#39;)</span>
+<span class="go">0 0.0 0.0</span>
+<span class="go">1 1.0 0.69314718056</span>
+<span class="go">2 1.41421356237 1.09861228867</span>
+<span class="go">3 1.73205080757 1.38629436112</span>
+<span class="go">4 2.0 1.60943791243</span>
+<span class="go">5 2.2360679775 1.79175946923</span>
+<span class="go">6 2.44948974278 1.94591014906</span>
+<span class="go">7 2.64575131106 2.07944154168</span>
+<span class="go">8 2.82842712475 2.19722457734</span>
+<span class="go">9 3.0 2.30258509299</span>
+</pre></div>
+</div>
+</section>
+<section id="accessing-the-symbol-table">
+<h2>accessing the symbol table<a class="headerlink" href="#accessing-the-symbol-table" title="Permalink to this heading">¶</a></h2>
+<p>The symbol table (that is, the mapping between variable and function names and
+the underlying objects) is a simple dictionary (by default, see
+<a class="reference internal" href="api.html#symtable-section"><span class="std std-ref">Symbol Tables used in asteval</span></a> for details of an optional alternative) held in the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">symtable</span></code> attribute of the interpreter, and can be read or written to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+<span class="go">1.73205080757</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print(y/8)&#39;</span><span class="p">)</span>
+<span class="go">12.5</span>
+</pre></div>
+</div>
+<p>Note here the use of true division even though the operands are integers.</p>
+<p>As with Python itself, valid symbol names must match the basic regular
+expression pattern:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">valid_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="n">Z_</span><span class="p">][</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="n">Z0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">*</span>
+</pre></div>
+</div>
+<p>In addition, certain names are reserved in Python, and cannot be used
+within the asteval interpreter.  These reserved words are:</p>
+<blockquote>
+<div><p>and, as, assert, async, await, break, class, continue, def, del, elif,
+else, eval, except, exec, execfile, finally, for, from, global, if, import,
+in, is, lambda, nonlocal, not, or, pass, print, raise, return, try, while,
+with, True, False, None, __import__, __package__</p>
+</div></blockquote>
+</section>
+<section id="built-in-functions">
+<h2>built-in functions<a class="headerlink" href="#built-in-functions" title="Permalink to this heading">¶</a></h2>
+<p>At startup, many symbols are loaded into the symbol table from Python’s
+builtins and the <code class="docutils literal notranslate"><span class="pre">math</span></code> module.  The builtins include several basic Python
+functions:</p>
+<blockquote>
+<div><p>abs, all, any, bin, bool, bytearray, bytes, chr, complex,
+dict, dir, divmod, enumerate, filter, float, format,
+frozenset, hash, hex, id, int, isinstance, len, list, map,
+max, min, oct, ord, pow, range, repr, reversed, round,
+set, slice, sorted, str, sum, tuple, zip</p>
+</div></blockquote>
+<p>and a large number of named exceptions:</p>
+<blockquote>
+<div><p>ArithmeticError, AssertionError, AttributeError,
+BaseException, BufferError, BytesWarning, DeprecationWarning,
+EOFError, EnvironmentError, Exception, False,
+FloatingPointError, GeneratorExit, IOError, ImportError,
+ImportWarning, IndentationError, IndexError, KeyError,
+KeyboardInterrupt, LookupError, MemoryError, NameError, None,
+NotImplemented, NotImplementedError, OSError, OverflowError,
+ReferenceError, RuntimeError, RuntimeWarning, StopIteration,
+SyntaxError, SyntaxWarning, SystemError, SystemExit, True,
+TypeError, UnboundLocalError, UnicodeDecodeError,
+UnicodeEncodeError, UnicodeError, UnicodeTranslateError,
+UnicodeWarning, ValueError, Warning, ZeroDivisionError</p>
+</div></blockquote>
+<p>The symbols imported from Python’s <code class="docutils literal notranslate"><span class="pre">math</span></code> module include:</p>
+<blockquote>
+<div><p>acos, acosh, asin, asinh, atan, atan2, atanh, ceil, copysign,
+cos, cosh, degrees, e, exp, fabs, factorial, floor, fmod,
+frexp, fsum, hypot, isinf, isnan, ldexp, log, log10, log1p,
+modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc</p>
+</div></blockquote>
+<p>If available, a very large number (~350) additional symbols are imported from
+<a class="reference external" href="https://numpy.org/">numpy</a>.</p>
+</section>
+<section id="conditionals-and-loops">
+<h2>conditionals and loops<a class="headerlink" href="#conditionals-and-loops" title="Permalink to this heading">¶</a></h2>
+<p>If-then-else blocks, for-loops (including the optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), while
+loops (also including optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), and with blocks are supported,
+and work exactly as they do in python.  Thus:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="go">sum = 0</span>
+<span class="go">for i in range(10):</span>
+<span class="go">    sum += i*sqrt(*1.0)</span>
+<span class="go">    if i % 4 == 0:</span>
+<span class="go">        sum = sum + 1</span>
+<span class="go">print(&quot;sum = &quot;, sum)</span>
+<span class="go">&quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">aeval(code)</span>
+<span class="go">sum =  114.049534067</span>
+</pre></div>
+</div>
+</section>
+<section id="comprehensions">
+<h2>comprehensions<a class="headerlink" href="#comprehensions" title="Permalink to this heading">¶</a></h2>
+<p>list, dict, and set comprehension are supported, acting just as they do in
+Python.  Generators, yield, and async programmming are not currently supported.</p>
+</section>
+<section id="printing">
+<h2>printing<a class="headerlink" href="#printing" title="Permalink to this heading">¶</a></h2>
+<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function.  You
+can change where output is sent with the <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument when creating
+the interpreter, or supreess printing all together with the <code class="docutils literal notranslate"><span class="pre">no_print</span></code>
+option.  By default, outputs are sent to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
+</section>
+<section id="writing-functions">
+<h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this heading">¶</a></h2>
+<p>User-defined functions can be written and executed, as in python with a
+<code class="docutils literal notranslate"><span class="pre">def</span></code> block, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;def func(a, b, norm=1.0):</span>
+<span class="gp">... </span><span class="s2">return (a + b)/norm</span>
+<span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s2">&quot;func(1, 3, norm=10.0)&quot;</span><span class="p">)</span>
+<span class="go">0.4</span>
+</pre></div>
+</div>
+</section>
+<section id="exceptions">
+<h2>exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading">¶</a></h2>
+<p>Asteval monitors and caches exceptions in the evaluated code.  Brief error
+messages are printed (with Python’s print function, and so using standard
+output by default), and the full set of exceptions is kept in the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> instance.  This
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute is a list of instances of the asteval
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ExceptionHolder</span></code> class, which is accessed through the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_error()</span></code> method.  The <code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute is reset to an empty
+list at the beginning of each <code class="xref py py-meth docutils literal notranslate"><span class="pre">eval()</span></code>, so that errors are from only
+the most recent <code class="xref py py-meth docutils literal notranslate"><span class="pre">eval()</span></code>.</p>
+<p>Thus, to handle and re-raise exceptions from your Python code in a simple
+REPL loop, you’d want to do something similar to</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">inp_string</span> <span class="o">=</span> <span class="n">raw_input</span><span class="p">(</span><span class="s1">&#39;dsl:&gt;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">aeval</span><span class="p">(</span><span class="n">inp_string</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aeval</span><span class="o">.</span><span class="n">error</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">aeval</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>            <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">get_error</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">else</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Using asteval</a><ul>
+<li><a class="reference internal" href="#creating-and-using-an-asteval-interpreter">creating and using an asteval Interpreter</a></li>
+<li><a class="reference internal" href="#accessing-the-symbol-table">accessing the symbol table</a></li>
+<li><a class="reference internal" href="#built-in-functions">built-in functions</a></li>
+<li><a class="reference internal" href="#conditionals-and-loops">conditionals and loops</a></li>
+<li><a class="reference internal" href="#comprehensions">comprehensions</a></li>
+<li><a class="reference internal" href="#printing">printing</a></li>
+<li><a class="reference internal" href="#writing-functions">writing functions</a></li>
+<li><a class="reference internal" href="#exceptions">exceptions</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="motivation.html"
+                          title="previous chapter">Motivation for asteval</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="api.html"
+                          title="next chapter">asteval reference</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/basics.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="asteval reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="motivation.html" title="Motivation for asteval"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Using asteval</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Matthew Newville, The University of Chicago.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    </div>
+  </body>
+</html>
