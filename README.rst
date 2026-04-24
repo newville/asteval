@@ -20,7 +20,7 @@ ASTEVAL
    :target: https://pypi.org/project/asteval
 
 .. image:: https://img.shields.io/pypi/dm/asteval.svg
-   :target: https://pypi.org/project/asteval
+   :target: https://pypistats.org/project/asteval
 
 .. image:: https://img.shields.io/badge/docs-read-brightgreen
    :target: https://lmfit.github.io/asteval/
