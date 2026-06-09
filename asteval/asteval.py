@@ -279,6 +279,10 @@ class Interpreter:
             self.raise_exception(None, exc=SyntaxError, expr=text)
         except Exception:
             self.raise_exception(None, exc=RuntimeError, expr=text)
+        except BaseException as exc:
+            self.raise_exception(node, exc=RuntimeError,
+                                 msg=f"asteval will not raise {exc.__name__}")
+
         out = ast.fix_missing_locations(out)
         return out
 
@@ -322,7 +326,9 @@ class Interpreter:
         except Exception:
             if with_raise and self.expr is not None:
                 self.raise_exception(node, expr=self.expr)
-
+        except BaseException as exc:
+            self.raise_exception(node, exc=RuntimeError,
+                                 msg=f"asteval will not raise {exc.__name__}")
 
         # avoid too many repeated error messages (yes, this needs to be "2")
         if len(self.error) > 2:
@@ -353,7 +359,7 @@ class Interpreter:
         if isinstance(expr, str):
             try:
                 node = self.parse(expr)
-            except Exception:
+            except BaseException:
                 errmsg = exc_info()[1]
                 if len(self.error) > 0:
                     lerr = self.error[-1]
@@ -373,6 +379,10 @@ class Interpreter:
                 if len(self.error) > 0:
                     errmsg = self.error[-1].get_error()[1]
                 print(errmsg, file=self.err_writer)
+        except BaseException as exc:
+            self.raise_exception(node, exc=RuntimeError,
+                                 msg=f"asteval will not raise {exc.__name__}")
+
         if raise_errors and len(self.error) > 0:
             self._remove_duplicate_errors()
             err = self.error[-1]
@@ -423,6 +433,10 @@ class Interpreter:
                 thismod = sys.modules[name]
             except Exception:
                 self.raise_exception(None, exc=ImportError, msg='Import Error')
+            except BaseException as exc:
+                self.raise_exception(node, exc=RuntimeError,
+                                 msg=f"asteval will not raise {exc.__name__}")
+
 
         if fromlist is None:
             if asname is not None:
@@ -917,7 +931,13 @@ class Interpreter:
         msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
             msg = f"{msg:s}: {msg2:s}"
-        self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
+        # Prevent BaseException subclasses from escaping the sandbox
+        if issubclass(out.__class__, Exception):
+            self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
+        else:
+            msg = f"{msg}\n (note: asteval will not raise {out.__class__.__name__})"
+            self.raise_exception(node, exc=RuntimeError, msg=msg)
+
 
     def on_call(self, node):
         """Function execution."""
@@ -959,6 +979,10 @@ class Interpreter:
             msg = f"Error running function '{func_name}' with args '{args}'"
             msg = f"{msg} and kwargs {keywords}: {ex}"
             self.raise_exception(node, msg=msg)
+        except BaseException as exc:
+            self.raise_exception(node, exc=RuntimeError,
+                                 msg=f"asteval will not raise {exc.__name__}")
+
         finally:
             if isinstance(func, Procedure):
                 self._calldepth -= 1
