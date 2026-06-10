@@ -1793,6 +1793,24 @@ def test_lambda_exception_cleared(nested):
     assert a2 > 0.499998
     assert a2 < 0.500002
 
+@pytest.mark.parametrize("nested", [False, True])
+def test_exiting_exceptions(nested):
+    "test that SystemExit, GeneratorExit or not allowed"
+    interp = make_interpreter(nested_symtable=nested)
+    interp("x = 23")
+    interp("raise SystemExit")
+    check_error(interp, 'NameError')
+    interp("x = 25")
+    interp("raise GeneratorExit")
+    check_error(interp, 'NameError')
+
+    interp("x = 30")
+    interp("raise KeyboardInterrupt")
+    check_error(interp, 'RuntimeError')
+    interp("x = 33")
+    interp("raise BaseException")
+    check_error(interp, 'RuntimeError')
+
 
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])
