@@ -314,8 +314,6 @@ class Interpreter:
             handler = self.node_handlers[node.__class__.__name__.lower()]
         except KeyError:
             self.raise_exception(None, exc=NotImplementedError, expr=self.expr)
-
-
         # run the handler:  this will likely generate
         # recursive calls into this run method.
         try:
@@ -931,7 +929,10 @@ class Interpreter:
         excnode = node.exc
         msgnode = node.cause
         out = self.run(excnode)
-        msg = ' '.join(out.args)
+        try:
+            msg = ' '.join(out.args)
+        except TypeError:
+            msg = ' '
         msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
             msg = f"{msg:s}: {msg2:s}"
@@ -939,8 +940,9 @@ class Interpreter:
         if issubclass(out.__class__, Exception):
             self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
         else:
-            msg = f"{msg}\n (note: asteval will not raise {out.__class__.__name__})"
-            self.raise_exception(node, exc=RuntimeError, msg=msg)
+            self.raise_exception(node, exc=RuntimeError,
+            msg = f"{msg}\n (note: asteval will not raise {out.__name__})"
+
 
 
     def on_call(self, node):
