@@ -279,7 +279,7 @@ class Interpreter:
             self.raise_exception(None, exc=SyntaxError, expr=text)
         except Exception:
             self.raise_exception(None, exc=RuntimeError, expr=text)
-        except BaseException as exc:
+        except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
             self.raise_exception(node, exc=RuntimeError,
                                  msg=f"asteval will not raise {exc.__name__}")
 
@@ -326,7 +326,7 @@ class Interpreter:
         except Exception:
             if with_raise and self.expr is not None:
                 self.raise_exception(node, expr=self.expr)
-        except BaseException as exc:
+        except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
             self.raise_exception(node, exc=RuntimeError,
                                  msg=f"asteval will not raise {exc.__name__}")
 
@@ -359,7 +359,7 @@ class Interpreter:
         if isinstance(expr, str):
             try:
                 node = self.parse(expr)
-            except BaseException:
+            except Exception:
                 errmsg = exc_info()[1]
                 if len(self.error) > 0:
                     lerr = self.error[-1]
@@ -369,6 +369,10 @@ class Interpreter:
                 if show_errors:
                     print(errmsg, file=self.err_writer)
                 return None
+            except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
+                self.raise_exception(node, exc=RuntimeError,
+                                     msg=f"asteval will not raise {exc.__name__}")
+
         else:
             node = expr
         try:
@@ -379,7 +383,7 @@ class Interpreter:
                 if len(self.error) > 0:
                     errmsg = self.error[-1].get_error()[1]
                 print(errmsg, file=self.err_writer)
-        except BaseException as exc:
+        except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
             self.raise_exception(node, exc=RuntimeError,
                                  msg=f"asteval will not raise {exc.__name__}")
 
@@ -433,7 +437,7 @@ class Interpreter:
                 thismod = sys.modules[name]
             except Exception:
                 self.raise_exception(None, exc=ImportError, msg='Import Error')
-            except BaseException as exc:
+            except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
                 self.raise_exception(node, exc=RuntimeError,
                                  msg=f"asteval will not raise {exc.__name__}")
 
@@ -931,7 +935,7 @@ class Interpreter:
         msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
             msg = f"{msg:s}: {msg2:s}"
-        # Prevent BaseException subclasses from escaping the sandbox
+        # Prevent KeyboardInterrupt, SystemExit, GeneratorExit from escaping the sandbox
         if issubclass(out.__class__, Exception):
             self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
         else:
@@ -979,7 +983,7 @@ class Interpreter:
             msg = f"Error running function '{func_name}' with args '{args}'"
             msg = f"{msg} and kwargs {keywords}: {ex}"
             self.raise_exception(node, msg=msg)
-        except BaseException as exc:
+        except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
             self.raise_exception(node, exc=RuntimeError,
                                  msg=f"asteval will not raise {exc.__name__}")
 
