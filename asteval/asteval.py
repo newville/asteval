@@ -941,7 +941,7 @@ class Interpreter:
             self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
         else:
             self.raise_exception(node, exc=RuntimeError,
-            msg = f"{msg}\n (note: asteval will not raise {out.__name__})"
+                                 msg=f"{msg}\n (note: asteval will not raise {out.__name__})")
 
 
 
