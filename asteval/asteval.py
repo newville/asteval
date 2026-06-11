@@ -71,6 +71,8 @@ for _tnode in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
     MINIMAL_CONFIG[_tnode] = False
     DEFAULT_CONFIG[_tnode] = True
 
+NORAISE = 'asteval will not raise'
+
 class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
     of mathematical expressions using Python syntax.
@@ -244,8 +246,6 @@ class Interpreter:
             self.error_msg = msg
         elif len(msg) > 0:
             pass
-            # if err.exc is not None:
-            #     self.error_msg = f"{err.exc.__name__}: {msg}"
         if exc is None:
             exc = self.error[-1].exc
             if exc is None and len(self.error) > 0:
@@ -280,8 +280,7 @@ class Interpreter:
         except Exception:
             self.raise_exception(None, exc=RuntimeError, expr=text)
         except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
-            self.raise_exception(node, exc=RuntimeError,
-                                 msg=f"asteval will not raise {exc.__name__}")
+            self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
 
         out = ast.fix_missing_locations(out)
         return out
@@ -325,14 +324,10 @@ class Interpreter:
             if with_raise and self.expr is not None:
                 self.raise_exception(node, expr=self.expr)
         except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
-            self.raise_exception(node, exc=RuntimeError,
-                                 msg=f"asteval will not raise {exc.__name__}")
-
+            self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
         # avoid too many repeated error messages (yes, this needs to be "2")
         if len(self.error) > 2:
             self._remove_duplicate_errors()
-
-        return None
 
     def _remove_duplicate_errors(self):
         """remove duplicate exceptions"""
@@ -368,8 +363,7 @@ class Interpreter:
                     print(errmsg, file=self.err_writer)
                 return None
             except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
-                self.raise_exception(node, exc=RuntimeError,
-                                     msg=f"asteval will not raise {exc.__name__}")
+                self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
 
         else:
             node = expr
@@ -382,14 +376,12 @@ class Interpreter:
                     errmsg = self.error[-1].get_error()[1]
                 print(errmsg, file=self.err_writer)
         except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
-            self.raise_exception(node, exc=RuntimeError,
-                                 msg=f"asteval will not raise {exc.__name__}")
+            self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
 
         if raise_errors and len(self.error) > 0:
             self._remove_duplicate_errors()
             err = self.error[-1]
             raise err.exc(err.get_error()[1])
-        return None
 
     @staticmethod
     def dump(node, **kw):
@@ -436,8 +428,7 @@ class Interpreter:
             except Exception:
                 self.raise_exception(None, exc=ImportError, msg='Import Error')
             except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
-                self.raise_exception(node, exc=RuntimeError,
-                                 msg=f"asteval will not raise {exc.__name__}")
+                self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
 
 
         if fromlist is None:
@@ -814,7 +805,6 @@ class Interpreter:
             return target.id
         elif target.__class__ == ast.Tuple:
             return tuple([self._target_to_structure(elt) for elt in target.elts])
-        return None
 
     def _unpack_to_target(self, target_structure, value):
         """Recursively unpack value and assign to symtable according to target_structure"""
@@ -940,10 +930,7 @@ class Interpreter:
         if issubclass(out.__class__, Exception):
             self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
         else:
-            self.raise_exception(node, exc=RuntimeError,
-                                 msg=f"{msg}\n (note: asteval will not raise {out.__name__})")
-
-
+            self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {out.__name__}")
 
     def on_call(self, node):
         """Function execution."""
@@ -986,9 +973,7 @@ class Interpreter:
             msg = f"{msg} and kwargs {keywords}: {ex}"
             self.raise_exception(node, msg=msg)
         except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
-            self.raise_exception(node, exc=RuntimeError,
-                                 msg=f"asteval will not raise {exc.__name__}")
-
+            self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
         finally:
             if isinstance(func, Procedure):
                 self._calldepth -= 1
