@@ -1622,7 +1622,6 @@ def test_raise_errors_unknown_symbol(nested):
     assert len(interp.error) == 1
     assert interp.error[0].exc == NameError
 
-
 @pytest.mark.parametrize("nested", [False, True])
 def test_delete_slice(nested):
     """ test that a slice can be deleted"""
@@ -1637,7 +1636,6 @@ def test_delete_slice(nested):
         interp.run("g.dlist = [1,3,5,7,9,11,13,15,17,19,21]")
         interp.run("del g.dlist[4:7]")
         assert interp("g.dlist") == [1, 3, 5, 7, 15, 17, 19, 21]
-
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_unsafe_procedure_access(nested):
@@ -1803,6 +1801,8 @@ def test_exiting_exceptions(nested):
     interp("x = 25")
     interp("raise GeneratorExit")
     check_error(interp, 'NameError')
+    interp.parse("raise GeneratorExit")
+    check_error(interp, 'NameError')
 
     interp("x = 30")
     interp("raise KeyboardInterrupt")
@@ -1810,6 +1810,35 @@ def test_exiting_exceptions(nested):
     interp("x = 33")
     interp("raise BaseException")
     check_error(interp, 'RuntimeError')
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_unsafe_ndarray_attrs(nested):
+    "test that ndarrays cannot access ctypes, dump, and tofile"
+    interp = make_interpreter(nested_symtable=nested)
+    interp("arr = arange(100)/5.0")
+    interp("y = arr.ctypes")
+    check_error(interp, 'AttributeError')
+    interp("y = 'clear'")
+    interp("arr.dump('foo')")
+    check_error(interp, 'AttributeError')
+    interp("y = 'clear'")
+    interp("arr.tofile('file.out')")
+    check_error(interp, 'AttributeError')
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_type_returns_string(nested):
+    "test that 'type(x)' returns a string, not a type"
+    interp = make_interpreter(nested_symtable=nested)
+    interp("arr = arange(100)/5.0")
+    interp("t1 = type(arr)")
+    interp("t2 = type(None)")
+    tval = interp.symtable.get('t1')
+    assert isinstance(tval, str)
+
+    tval = interp.symtable.get('t2')
+    assert isinstance(tval, str)
 
 
 if __name__ == '__main__':
