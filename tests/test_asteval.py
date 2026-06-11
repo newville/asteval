@@ -1815,16 +1815,17 @@ def test_exiting_exceptions(nested):
 @pytest.mark.parametrize("nested", [False, True])
 def test_unsafe_ndarray_attrs(nested):
     "test that ndarrays cannot access ctypes, dump, and tofile"
-    interp = make_interpreter(nested_symtable=nested)
-    interp("arr = arange(100)/5.0")
-    interp("y = arr.ctypes")
-    check_error(interp, 'AttributeError')
-    interp("y = 'clear'")
-    interp("arr.dump('foo')")
-    check_error(interp, 'AttributeError')
-    interp("y = 'clear'")
-    interp("arr.tofile('file.out')")
-    check_error(interp, 'AttributeError')
+    if HAS_NUMPY:
+        interp = make_interpreter(nested_symtable=nested)
+        interp("arr = arange(100)/5.0")
+        interp("y = arr.ctypes")
+        check_error(interp, 'AttributeError')
+        interp("y = 'clear'")
+        interp("arr.dump('foo')")
+        check_error(interp, 'AttributeError')
+        interp("y = 'clear'")
+        interp("arr.tofile('file.out')")
+        check_error(interp, 'AttributeError')
 
 
 @pytest.mark.parametrize("nested", [False, True])
