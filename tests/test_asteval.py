@@ -1831,7 +1831,7 @@ def test_unsafe_ndarray_attrs(nested):
 def test_type_returns_string(nested):
     "test that 'type(x)' returns a string, not a type"
     interp = make_interpreter(nested_symtable=nested)
-    interp("d1 = {'a': 3', 'b': 5}")
+    interp("d1 = {'a': '3', 'b': 4, 'c': 5}")
     interp("t1 = type(d1)")
     interp("t2 = type(None)")
     tval = interp.symtable.get('t1')

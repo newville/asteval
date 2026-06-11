@@ -43,10 +43,6 @@ except ImportError:
 # This is a necessary API but it's undocumented and moved around
 # between Python releases
 from _string import formatter_field_name_split
-#except ImportError:
-#    def formatter_field_name_split(x):
-#        return x._formatter_field_name_split()
-
 
 
 MAX_EXPONENT = 10000
