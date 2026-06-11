@@ -42,11 +42,10 @@ except ImportError:
 
 # This is a necessary API but it's undocumented and moved around
 # between Python releases
-try:
-    from _string import formatter_field_name_split
-except ImportError:
-    def formatter_field_name_split(x):
-        return x._formatter_field_name_split()
+from _string import formatter_field_name_split
+#except ImportError:
+#    def formatter_field_name_split(x):
+#        return x._formatter_field_name_split()
 
 
 
@@ -78,6 +77,8 @@ UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
 
 # unsafe attributes for particular objects, by type
 UNSAFE_ATTRS_DTYPES = {str: ('format', 'format_map')}
+if HAS_NUMPY:
+    UNSAFE_ATTRS_DTYPES[numpy.ndarray] = ('ctypes', 'tofile', 'dump')
 
 # unsafe modules that may be exposed in other modules
 # but should be prevented from being accessed
@@ -175,12 +176,11 @@ NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
 
+NUMPY_TABLE = {}
 if HAS_NUMPY:
     FROM_NUMPY = tuple(set(FROM_NUMPY))
     FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
     NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, value)}
-
-    NUMPY_TABLE = {}
     for sym in FROM_NUMPY:
         obj = getattr(numpy, sym, None)
         if obj is not None:
@@ -196,9 +196,6 @@ if HAS_NUMPY:
             obj = getattr(numpy_financial, sym, None)
             if obj is not None:
                 NUMPY_TABLE[sym] = obj
-
-else:
-    NUMPY_TABLE = {}
 
 
 def _open(filename, mode='r', buffering=-1, encoding=None):
@@ -306,10 +303,7 @@ def safe_getattr(obj, attr, raise_exc, node, allow_unsafe_modules=False):
         msg = f"no safe attribute '{attr}' for {repr(obj)}"
         raise_exc(node, exc=AttributeError, msg=msg)
     else:
-        try:
-            return getattr(obj, attr)
-        except AttributeError:
-            pass
+        return getattr(obj, attr, None)
 
 class SafeFormatter(Formatter):
     def __init__(self, raise_exc, node):
@@ -406,10 +400,7 @@ class ExceptionHolder:
 
     def get_error(self):
         """Retrieve error data."""
-        try:
-            exc_name = self.exc.__name__
-        except AttributeError:
-            exc_name = str(self.exc)
+        exc_name = self.exc.__name__
         if exc_name in (None, 'None'):
             exc_name = 'UnknownError'
 
@@ -682,13 +673,6 @@ class Procedure:
                                       lineno=self.lineno)
 
         # check more args given than expected, varargs not given
-        if nargs != nargs_expected:
-            msg = None
-            if nargs < nargs_expected:
-                msg = f"not enough arguments for Procedure {self.name}()"
-                msg = f"{msg} (expected {nargs_expected}, got {nargs}"
-                self.__raise_exc__(None, exc=TypeError, msg=msg)
-
         if nargs > nargs_expected and self.__vararg__ is None:
             if nargs - nargs_expected > len(self.__kwargs__):
                 msg = f"too many arguments for {self.name}() expected at most"
