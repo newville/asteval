@@ -301,6 +301,15 @@ def safe_getattr(obj, attr, raise_exc, node, allow_unsafe_modules=False):
     else:
         return getattr(obj, attr, None)
 
+
+def safe_setattr(obj, attr, val, raise_exc, node):
+    """safe version of setattr"""
+    if attr in UNSAFE_ATTRS or (attr.startswith('__') and attr.endswith('__')):
+        msg = f"no safe attribute '{attr}' for {repr(obj)}"
+        raise_exc(node, exc=AttributeError, msg=msg)
+    else:
+        setattr(obj, attr, val)
+
 class SafeFormatter(Formatter):
     def __init__(self, raise_exc, node):
         self.raise_exc = raise_exc
