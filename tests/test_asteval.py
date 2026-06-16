@@ -1657,6 +1657,23 @@ def test_unsafe_procedure_access(nested):
     assert etype == 'AttributeError'
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_unsafe_attribute_assignment(nested):
+    """attribute assignment must honor the same guard as attribute reads:
+    writing a dunder/unsafe attribute was not checked, so `open.__defaults__`
+    could be overwritten even though reading it is blocked. `open` is a shared
+    module-level function, so the mutation also leaked across interpreters.
+    """
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            open.__defaults__ = ('rb', 0, None)
+     """),  raise_errors=False)
+
+    error = interp.error[0]
+    etype, fullmsg = error.get_error()
+    assert 'no safe attribute' in error.msg
+    assert etype == 'AttributeError'
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_unsafe_format_string_access(nested):
     """
     addressing https://github.com/lmfit/asteval/security/advisories/GHSA-3wwr-3g9f-9gc7
