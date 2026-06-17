@@ -1224,6 +1224,8 @@ def test_safe_funcs(nested):
     check_error(interp, 'RuntimeError')
     interp("'*'*(2<<17) + '*'")
     check_error(interp, 'RuntimeError')
+    interp("(1+2<<17)*'*'")
+    check_error(interp, 'RuntimeError')
     interp("1.01**10000")
     check_error(interp, None)
     interp("1.01**10001")

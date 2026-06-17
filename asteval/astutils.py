@@ -226,6 +226,8 @@ def safe_pow(base, exp):
 
 def safe_mult(arg1, arg2):
     """safe version of multiply"""
+    if isinstance(arg1, int) and isinstance(arg2, str):
+        arg1, arg2 = arg2, arg1
     if isinstance(arg1, str) and isinstance(arg2, int) and len(arg1) * arg2 > MAX_STR_LEN:
         raise RuntimeError(f"String length exceeded, max string length is {MAX_STR_LEN}")
     return arg1 * arg2
